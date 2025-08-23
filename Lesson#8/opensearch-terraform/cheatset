@@ -1,0 +1,14 @@
+curl -u "$USER:$PASS" -H 'Content-Type: application/json' -X PUT \
+  "https://$ENDPOINT/my-vectors" -d '{
+  "settings": { "index": { "knn": true } },
+  "mappings": {
+    "properties": {
+      "title":     { "type": "text" },
+      "embedding": {
+        "type": "knn_vector",
+        "dimension": 4,
+        "method": { "name":"hnsw", "space_type":"l2", "engine":"nmslib" }
+      }
+    }
+  }
+}'
