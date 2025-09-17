@@ -1,0 +1,18 @@
+name: CI
+
+on: [push]   # Run pipeline on every push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Show repo content
+        run: |
+          echo "Listing files in the repo:"
+          ls -la
+          echo "Showing the text file content:"
+          cat README.md
