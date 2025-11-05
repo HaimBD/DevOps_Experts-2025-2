@@ -1,0 +1,58 @@
+locals {
+  # unique cluster name each time you apply
+  cluster_name = "hbd-ai-lab-eks"
+  supported_azs = ["us-east-1a", "us-east-1b", "us-east-1c", "us-east-1d", "us-east-1f"]
+}
+
+# --- default VPC and subnets
+data "aws_vpc" "default" {
+  default = true
+}
+
+data "aws_subnets" "default" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+}
+
+data "aws_subnet" "details" {
+  for_each = toset(data.aws_subnets.default.ids)
+  id       = each.value
+}
+
+# --- only keep subnets in supported AZs
+locals {
+  eks_subnet_ids = [
+    for s in data.aws_subnet.details : s.id
+    if contains(local.supported_azs, s.availability_zone)
+  ]
+}
+
+# --- actual EKS cluster
+module "eks" {
+  source  = "terraform-aws-modules/eks/aws"
+  version = "~> 20.11.0"
+
+  cluster_name    = local.cluster_name
+  cluster_version = "1.30"
+  cluster_endpoint_public_access = true
+
+  vpc_id     = data.aws_vpc.default.id
+  subnet_ids = local.eks_subnet_ids
+
+  enable_irsa = true
+
+  eks_managed_node_groups = {
+    default = {
+      ami_type       = "AL2_x86_64"
+      instance_types = ["t3.medium"]
+      desired_size   = 2
+      min_size       = 1
+      max_size       = 4
+      disk_size      = 20
+    }
+  }
+
+  cluster_enabled_log_types = ["api", "audit", "authenticator"]
+}

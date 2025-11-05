@@ -1,6 +1,5 @@
 from google import genai
 from google.genai import types
-
 import boto3
 from botocore.exceptions import ClientError
 import json

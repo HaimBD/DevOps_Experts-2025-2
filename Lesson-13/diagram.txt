@@ -1,0 +1,14 @@
+USER ─▶ Flask Web UI (EKS)
+         │
+         ├──▶ Uploads Image → S3
+         ├──▶ Sends Message → SQS
+         │
+         ▼
+   Lambda Worker
+     │
+     ├──▶ Reads from S3
+     ├──▶ Analyzes with Rekognition / Bedrock
+     ├──▶ Writes Results → RDS + DynamoDB
+     │
+     ▼
+   Flask (EKS) Queries Results
